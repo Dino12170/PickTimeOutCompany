@@ -80,10 +80,9 @@ namespace PickTimeOutCompany.Controllers
 
                 string changeDate = @"MERGE INTO GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG e " +
                                       @"USING (SELECT '" + formattedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address FROM DUAL) src " +
-                                      @"ON (e.user_name = src.user_name)
+                                      @"ON (e.user_name = src.user_name and e.date_out = src.date_out)
                                       WHEN MATCHED THEN
                                           UPDATE SET 
-                                              e.date_out = src.date_out,
                                               e.time_out = src.time_out,
                                               e.address = src.address,
                                               e.udt = sysdate

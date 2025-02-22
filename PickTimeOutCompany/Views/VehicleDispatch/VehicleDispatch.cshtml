@@ -281,29 +281,34 @@
 
 <br />
 <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 15px;">
-    <!-- Div chứa hai combobox -->
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <select id="comboBox1" class="form-select" style="width: 200px; padding: 5px; border-radius: 5px;">
-            <option value="" disabled selected hidden>Select Time</option>
-            <option value="17:50">17:50</option>
-            <option value="19:00">19:00</option>
-            <option value="20:30">20:30</option>
-        </select>
-        <select id="comboBox2" class="form-select" style="width: 200px; padding: 5px; border-radius: 5px;">
-            <option value="" disabled selected hidden>Select Address</option>
-            <option value="TIẾN LỘC">TIẾN LỘC</option>
-            <option value="THÀNH ĐẠT">THÀNH ĐẠT</option>
-            <option value="BẢO SƠN">BẢO SƠN</option>
-        </select>
-    </div>
-    <div>
-        <!-- Div chứa hai button -->
-        <button id="btnOK" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            OK
-        </button>
-        <button id="btnUpdate" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer; ">
-            Edit
-        </button>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+            <h3>班次：</h3>
+            <div style="display: flex; gap: 15px;">
+                <label><input type="radio" name="time" value="17:50"> 17:50</label>
+                <label><input type="radio" name="time" value="19:00"> 19:00</label>
+                <label><input type="radio" name="time" value="20:30"> 20:30</label>
+            </div>
+        </div>
+        <div>
+            <!-- Tạo khoảng cách giữa 2 nhóm -->
+            <h3>地点:</h3>
+            <div style="display: flex; gap: 15px;">
+                <label><input type="radio" name="address" value="诚达"> 诚达</label>
+                <label><input type="radio" name="address" value="宝山"> 宝山</label>
+                <label><input type="radio" name="address" value="近禄"> 近禄</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <!-- Div chứa hai button -->
+            <button id="btnOK" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                OK
+            </button>
+            <button id="btnUpdate" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer; ">
+                Edit
+            </button>
+        </div>
     </div>
 </div>
 
@@ -339,8 +344,14 @@
                     var tableBody = $('#dataBody');
                     tableBody.empty();
                     if (data.length === 0) {
-                        document.getElementById("comboBox1").disabled = false;
-                        document.getElementById("comboBox2").disabled = false;
+                        //document.getElementById("comboBox1").disabled = false;
+                        //document.getElementById("comboBox2").disabled = false;
+                        document.querySelectorAll('input[name="time"]').forEach(radio => {
+                            radio.disabled = false;
+                        });
+                        document.querySelectorAll('input[name="address"]').forEach(radio => {
+                            radio.disabled = false;
+                        });
                         document.getElementById("btnUpdate").style.display = "none";
                         document.getElementById("btnOK").style.display = "block";
                     }
@@ -357,8 +368,14 @@
                                                     </tr>`
                             tableBody.append(row);
                         });
-                        document.getElementById("comboBox1").disabled = true;
-                        document.getElementById("comboBox2").disabled = true;
+                        //document.getElementById("comboBox1").disabled = true;
+                        //document.getElementById("comboBox2").disabled = true;
+                        document.querySelectorAll('input[name="time"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
+                        document.querySelectorAll('input[name="address"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
                         document.getElementById("btnOK").style.display = "none";
                         document.getElementById("btnUpdate").style.display = "block";
                     }
@@ -370,21 +387,27 @@
         }
         updateTable();
 
-        document.getElementById("btnOK").addEventListener("click", function () {
-            let selectedTimeValue = document.getElementById("comboBox1").value;
-            let selectedAddressValue = document.getElementById("comboBox2").value;
+        function checkRadio(elementName) {
+            let selectedRadio = document.querySelector(`input[name="${elementName}"]:checked`);
+            return selectedRadio === null;
+        }
+        function getSelectedRadioValue(elementName) {
+            let selectedRadio = document.querySelector(`input[name="${elementName}"]:checked`);
+            return selectedRadio ? selectedRadio.value : null;
+        }
 
-            if (selectedTimeValue === "") {
+        document.getElementById("btnOK").addEventListener("click", function () {
+            if (checkRadio("time")) {
                 alert("Please select Time Out!");
             }
-            else if (selectedAddressValue === "") {
+            else if (checkRadio("address")) {
                 alert("Please select address!")
             }
             else {
                 $.ajax({
                     url: "/VehicleDispatch/InsertData",
                     type: "GET", // Gửi bằng phương thức GET
-                    data: { timeout: selectedTimeValue, address: selectedAddressValue },
+                    data: { timeout: getSelectedRadioValue("time"), address: getSelectedRadioValue("address") },
                     dataType: "json",
                     success: function (result) {
                         if (result.success) {
@@ -403,12 +426,20 @@
         });
 
         document.getElementById("btnUpdate").addEventListener("click", function () {
-            document.getElementById("comboBox1").disabled = false;
-            document.getElementById("comboBox2").disabled = false;
+            document.querySelectorAll('input[name="time"]').forEach(radio => {
+                radio.disabled = false;
+            });
+            document.querySelectorAll('input[name="address"]').forEach(radio => {
+                radio.disabled = false;
+            });
+            //document.getElementById("comboBox1").disabled = false;
+            //document.getElementById("comboBox2").disabled = false;
             document.getElementById("btnUpdate").style.display = "none";
             document.getElementById("btnOK").style.display = "block";
-            document.getElementById("comboBox1").value = "";
-            document.getElementById("comboBox2").value = "";
+            document.querySelectorAll("input[name='time']").forEach(radio => radio.checked = false);
+            document.querySelectorAll("input[name='address']").forEach(radio => radio.checked = false);
+            //document.getElementById("comboBox1").value = "";
+            //document.getElementById("comboBox2").value = "";
         });
 
     </script>

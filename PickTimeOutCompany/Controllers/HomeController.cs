@@ -86,7 +86,6 @@ namespace PickTimeOutCompany.Controllers
                                 case "Phong Tong vu 總務課":
                                 case "Bo Phan Nhan su 人力資源部":
                                 case "Phong Nhan su 人力資源課":
-                                case "新技術開發課":
                                     return RedirectToAction("DataForHR", "DataForHR");
                                 default:
                                     return RedirectToAction("VehicleDispatch", "VehicleDispatch"); ; 
