@@ -21,7 +21,7 @@ namespace PickTimeOutCompany.Controllers
             if ((string)Session["UserId"] == null)
             {
                 //ViewBag.error = TempData["Please login first!!!"];
-                TempData["Error"] = "Vui lòng đăng nhập!!!";
+                TempData["Error"] = "Plese Login!!!";
                 return RedirectToAction("Login", "Home");
             }
             else
@@ -46,20 +46,18 @@ namespace PickTimeOutCompany.Controllers
             string sHTML = string.Empty;
             try
             {
-                string add1 = "TIẾN LỘC";
-                string add2 = "THÀNH ĐẠT";
-                string add3 = "BẢO SƠN";
+                string add1 = "TIEN LOC";
+                string add2 = "THANH DAT";
+                string add3 = "BAO SON";
                 string sSql = string.Format(@"SELECT 
                                                 timeout.TIME_OUT,
-                                                COUNT(CASE WHEN log.ADDRESS = 'TIẾN LỘC' THEN addr.ADDRESS END) AS ADDRESS_1_COUNT,
-                                                COUNT(CASE WHEN log.ADDRESS = 'THÀNH ĐẠT' THEN addr.ADDRESS END) AS ADDRESS_2_COUNT,
-                                                COUNT(CASE WHEN log.ADDRESS = 'BẢO SƠN' THEN addr.ADDRESS END) AS ADDRESS_3_COUNT
+                                                COUNT(CASE WHEN log.ADDRESS = 'TIEN LOC' THEN log.ADDRESS END) AS ADDRESS_1_COUNT,
+                                                COUNT(CASE WHEN log.ADDRESS = 'THANH DAT' THEN log.ADDRESS END) AS ADDRESS_2_COUNT,
+                                                COUNT(CASE WHEN log.ADDRESS = 'BAO SON' THEN log.ADDRESS END) AS ADDRESS_3_COUNT
                                             FROM 
                                                 GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG log
                                             LEFT JOIN 
                                                 GEMTEK_ATTENDANCE.GM1_TIMEOUT timeout ON timeout.TIME_OUT = log.TIME_OUT
-                                            LEFT JOIN 
-                                                GEMTEK_ATTENDANCE.GM1_ADDRESS_OUT addr ON log.ADDRESS = addr.ADDRESS
                                             WHERE 
                                                 log.date_out = to_char(sysdate,'yyyy/MM/dd')
                                             GROUP BY 

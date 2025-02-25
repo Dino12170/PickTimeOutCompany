@@ -10,19 +10,39 @@ namespace PickTimeOutCompany.Controllers
 {
     public class VehicleDispatchController : Controller
     {
+        private static string connectionString = @"Data Source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = 10.41.1.29)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = vnothdb)));User Id=GEMTEK_ATTENDANCE;Password=ATTENDANCE01;";
         // GET: VehicleDispatch
         public ActionResult VehicleDispatch()
         {
             if ((string)Session["UserId"] == null)
             {
                 //ViewBag.error = TempData["Please login first!!!"];
-                TempData["Error"] = "Vui lòng đăng nhập!!!";
+                TempData["Error"] = "Please Login!!!";
                 return RedirectToAction("Login", "Home");
             }
             else
             {
                 ViewBag.username = (string)Session["UserName"];
                 ViewBag.userID = (string)Session["UserId"];
+
+                DateTime currentDate = DateTime.Now;
+                string formattedDate = currentDate.ToString("yyyy/MM/dd");
+                string getAddress = @"select address from GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and DATE_OUT = '" + formattedDate + "'";
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
+                    using (OracleCommand cmd = new OracleCommand(getAddress, conn))
+                    {
+                        OracleDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                ViewBag.selectedAddress = reader["address"].ToString();
+                            }
+                        }
+                    }
+                }
                 //ViewBag.grpNo = (string)Session["GRPNO"];
 
                 //string html_Ready_To_StockOut = GET_DATA();
@@ -39,7 +59,6 @@ namespace PickTimeOutCompany.Controllers
             DateTime currentDate = DateTime.Now;
             string formattedDate = currentDate.ToString("yyyy/MM/dd");
             //string connectionString = @"ConnstrOther=Provider=MSDAORA.1;Password=ATTENDANCE01;User ID=GEMTEK_ATTENDANCE;Data Source=VNOTHDB;Persist Security Info=True;";
-            string connectionString = @"Data Source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = 10.41.1.29)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = vnothdb)));User Id=GEMTEK_ATTENDANCE;Password=ATTENDANCE01;";
             string getData = @"SELECT * FROM GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and date_out = '" + formattedDate + "'";
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
@@ -56,6 +75,18 @@ namespace PickTimeOutCompany.Controllers
                             string des = reader["description"].ToString();
                             string time = reader["time_out"].ToString();
                             string address = reader["address"].ToString();
+                            switch(address)
+                            {
+                                case "TIEN LOC":
+                                    address = "近禄";
+                                    break;
+                                case "THANH DAT":
+                                    address = "诚达";
+                                    break;
+                                case "BAO SON":
+                                    address = "宝山";
+                                    break;
+                            }
                             string cdt = reader["cdt"].ToString();
                             string udt = reader["udt"].ToString();
                             VehicleDispatchModel temp = new VehicleDispatchModel { DATE_OUT = date, USER_NAME = user, DESCRIPTION = des, TIME_OUT = time, ADDRESS = address, CDT = cdt, UDT = udt };
@@ -74,7 +105,6 @@ namespace PickTimeOutCompany.Controllers
             {
                 DateTime currentDate = DateTime.Now;
                 string formattedDate = currentDate.ToString("yyyy/MM/dd");
-                string connectionString = @"Data Source=(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = 10.41.1.29)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = vnothdb)));User Id=GEMTEK_ATTENDANCE;Password=ATTENDANCE01;";
                 string insertData = @"insert into GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG (date_out, user_name, description, time_out, address, cdt, udt) values "
                                       + @"('" + formattedDate + "', '" + (string)Session["UserId"] + "', '" + (string)Session["UserName"] + "', '" + timeout + "', '" + address + "', sysdate, sysdate)";
 
@@ -107,11 +137,11 @@ namespace PickTimeOutCompany.Controllers
                         transaction.Rollback();
                     }
                 }
-                return Json(new { success = true });
+                return Json(new { success = true }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }
