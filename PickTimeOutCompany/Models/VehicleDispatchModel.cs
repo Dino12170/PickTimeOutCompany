@@ -17,6 +17,8 @@ namespace PickTimeOutCompany.Models
 
         public string ADDRESS { get; set; }
 
+        public string SUPERMARKET { get; set; }
+
         public string CDT { get; set; }
 
         public string UDT { get; set; }

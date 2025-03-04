@@ -8,6 +8,8 @@ using Oracle.ManagedDataAccess.Client;
 using ActionResult = System.Web.Mvc.ActionResult;
 using HttpGetAttribute = System.Web.Mvc.HttpGetAttribute;
 using Controller = System.Web.Mvc.Controller;
+using OfficeOpenXml;
+using System.IO;
 
 namespace PickTimeOutCompany.Controllers
 {
@@ -49,7 +51,7 @@ namespace PickTimeOutCompany.Controllers
                 string add1 = "TIEN LOC";
                 string add2 = "THANH DAT";
                 string add3 = "BAO SON";
-                string sSql = string.Format(@"SELECT 
+                string sSql = string.Format(@"SELECT
                                                 timeout.TIME_OUT,
                                                 COUNT(CASE WHEN log.ADDRESS = 'TIEN LOC' THEN log.ADDRESS END) AS ADDRESS_1_COUNT,
                                                 COUNT(CASE WHEN log.ADDRESS = 'THANH DAT' THEN log.ADDRESS END) AS ADDRESS_2_COUNT,
@@ -58,7 +60,7 @@ namespace PickTimeOutCompany.Controllers
                                                 GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG log
                                             LEFT JOIN 
                                                 GEMTEK_ATTENDANCE.GM1_TIMEOUT timeout ON timeout.TIME_OUT = log.TIME_OUT
-                                            WHERE 
+                                            WHERE
                                                 log.date_out = to_char(sysdate,'yyyy/MM/dd')
                                             GROUP BY 
                                                 timeout.TIME_OUT
@@ -101,7 +103,7 @@ namespace PickTimeOutCompany.Controllers
         public ActionResult GetPickInfo(string time, string add)
         {
             string html_PickInfo = GET_PICK_INFO(time, add);
-            ViewBag.HtmlPickInfo = html_PickInfo;
+            //ViewBag.HtmlPickInfo = html_PickInfo;
             return Content(html_PickInfo);
         }
 
@@ -136,6 +138,46 @@ namespace PickTimeOutCompany.Controllers
                 sHTML = "<tr><th colspan='7' class='not-data'>" + ex.Message + "</th></tr>";
             }
             return sHTML;
+        }
+
+        public ActionResult ExportToExcel()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;  // Sử dụng miễn phí
+            DataTable dt = new DataTable();
+
+            using (OracleConnection con = new OracleConnection(connectionString))
+            {
+                con.Open();
+                string query = @"SELECT A.DATE_OUT,C.DEPT_NAME,A.USER_NAME,DESCRIPTION,TIME_OUT,ADDRESS,UDT 
+                        FROM GM1_TIMEOUT_LOG A,GM1_EMPLOYEERS_INFO B,DEPARTMENT C WHERE A.DATE_OUT=to_char(sysdate,'YYYY/MM/dd')
+                        AND A.USER_NAME=B.EMPNO AND B.DEPARTMENT=C.CLASS_NAME
+                        ORDER BY A.TIME_OUT,C.DEPT_NAME,A.ADDRESS";
+                using (OracleCommand cmd = new OracleCommand(query, con))
+                {
+                    using (OracleDataAdapter da = new OracleDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+
+            // Xuất dữ liệu ra Excel
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("登記平台");
+                worksheet.Cells["A1"].LoadFromDataTable(dt, true);
+
+                // Định dạng file xuất ra
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+                DateTime currentDate = DateTime.Now;
+                string formattedDate = currentDate.ToString("yyyy/MM/dd");
+                string fileName = "登記平台_" + formattedDate + ".xlsx";
+                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return File(stream, contentType, fileName);
+            }
         }
     }
 }

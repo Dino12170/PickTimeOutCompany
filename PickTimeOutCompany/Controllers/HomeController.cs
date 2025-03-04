@@ -82,13 +82,19 @@ namespace PickTimeOutCompany.Controllers
                                 }
                             }
 
+
+                            //return RedirectToAction("Index");
+
                             switch (dept) {
                                 case "Phong Tong vu 總務課":
                                     return RedirectToAction("DataForHR", "DataForHR");
+                                    //Session["Role"] = "HR";
+                                    //break;
                                 default:
-                                    return RedirectToAction("VehicleDispatch", "VehicleDispatch"); ; 
+                                    return RedirectToAction("VehicleDispatch", "VehicleDispatch");
+                                    //Session["Role"] = "Staff";
+                                    //break;
                             }
-
                             //return RedirectToAction("Index");
                         }
                         else
@@ -113,12 +119,10 @@ namespace PickTimeOutCompany.Controllers
         }
         public ActionResult Index2()
         {
-
             return View();
         }
         public ActionResult Index3()
         {
-
             return View();
         }
 

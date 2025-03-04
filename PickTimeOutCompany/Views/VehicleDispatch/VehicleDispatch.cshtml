@@ -294,7 +294,7 @@
     <div style="margin-left:40px;">
         <div id="divTime">
             <div style="display: flex;">
-                <label style="width:60px;">班次：</label>
+                <label style="width:60px;">班次:</label>
                 <div id="listTime"></div>
             </div>
         </div>
@@ -306,8 +306,12 @@
                 <div id="listAddress"></div>
             </div>
         </div>
+        <div style="display:flex;">
+            <label for="supermarket" style="width:60px">超市:</label>
+            <label style="width:140px;"><input type="checkbox" id="supermarket" name="supermarket" style="width:20px;"> <label>(誠達下車)</label></label>
+        </div>
 
-        <div style="margin-top: 20px; display:flex; gap:80px;">
+        <div style="margin-top: 20px; display:flex; gap:10px;">
             <!-- Div chứa hai button -->
             <button id="btnOK" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer;">
                 OK
@@ -315,7 +319,7 @@
             <button id="btnUpdate" style="padding: 10px 20px; background-color: #8e6d11; color: white; border: none; border-radius: 5px; cursor: pointer; ">
                 Edit
             </button>
-            <label id="updateStatus" style="display:none;">登記成功</label>
+            <label id="updateStatus" style="display:none; font-size:30px">登記成功</label>
         </div>
     </div>
 </div>
@@ -327,10 +331,10 @@
             <tr style="text-align: center; color: white; ">
                 <th class="border border-white" style="text-align: center;">Date Out</th>
                 <th class="border border-white" style="text-align: center;">Time Out</th>
+                <th class="border border-white" style="text-align: center;">Address</th>
+                <th class="border border-white" style="text-align: center; width: 60px">SUPERMARKET</th>
                 <th class="border border-white" style="text-align: center">User ID</th>
                 <th class="border border-white" style="text-align: center;">User Name</th>
-                <th class="border border-white" style="text-align: center; width : 160px">Address</th>
-                <th class="border border-white" style="text-align: center">CDT</th>
                 <th class="border border-white" style="text-align: center">UDT</th>
             </tr>
         </thead>
@@ -342,20 +346,25 @@
         $(document).ready(function () {
             var today = new Date();  // Lấy ngày hiện tại
             if (today.getDay() === 6) {
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="17:10" style="width:40px;"> <label> 17:10</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:00" style="width:40px;"> <label> 20:00</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="17:10" style="width:20px;"> <label>17:10</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:00" style="width:20px;"> <label>20:00</label></label>');
             }
             else {
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="17:50" style="width:40px;"> <label> 17:50</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="19:00" style="width:40px;"> <label> 19:00</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:30" style="width:40px;"> <label> 20:30</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="17:50" style="width:20px;"> <label>17:50</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="19:00" style="width:20px;"> <label>19:00</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:30" style="width:20px;"> <label>20:30</label></label>');
             }
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="THANH DAT" style="width:40px;"> <label> 诚达</label></label>');
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="BAO SON" style="width:40px;"> <label> 宝山</label></label>');
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="TIEN LOC" style="width:40px;"> <label> 近禄</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="THANH DAT" style="width:20px;"> <label>诚达</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="BAO SON" style="width:20px;"> <label>宝山</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="TIEN LOC" style="width:20px;"> <label>近禄</label></label>');
 
             let selectedAddress = "@(ViewBag.selectedAddress ?? "")";
             setRadioValue("address", selectedAddress);
+            let selectedTimout = "@(ViewBag.selectedTimeout ?? "")";
+            setRadioValue("time", selectedTimout);
+            if ("@ViewBag.selectedSupermarket" === "Y") {
+                document.getElementById("supermarket").checked = true; // Nếu Y, checkbox sẽ được check
+            }
             updateTable();
         });
 
@@ -383,10 +392,10 @@
                             var row = `<tr style="text-align: center;">
                                                                         <td>${item.DATE_OUT}</td>
                                                                         <td>${item.TIME_OUT}</td>
+                                                                        <td>${item.ADDRESS}</td>
+                                                                        <td>${item.SUPERMARKET}</td>
                                                                         <td>${item.USER_NAME}</td>
                                                                         <td>${item.DESCRIPTION}</td>
-                                                                        <td>${item.ADDRESS}</td>
-                                                                        <td>${item.CDT}</td>
                                                                         <td>${item.UDT}</td>
                                                                     </tr>`
                             tableBody.append(row);
@@ -398,6 +407,7 @@
                         document.querySelectorAll('input[name="address"]').forEach(radio => {
                             radio.disabled = true;
                         });
+                        document.getElementById("supermarket").disabled = true;
                         document.getElementById("btnOK").style.display = "none";
                         document.getElementById("btnUpdate").style.display = "block";
                     }
@@ -430,6 +440,11 @@
             return selectedRadio ? selectedRadio.value : null;
         }
 
+        function checkCheckbox() {
+            var checkbox = document.getElementById("supermarket");
+            return checkbox.checked ? "Y" : "N";
+        }
+
         document.getElementById("btnOK").addEventListener("click", function () {
             if (checkRadio("time")) {
                 alert("Please select Time Out!");
@@ -441,9 +456,12 @@
                 $.ajax({
                     url: "/VehicleDispatch/InsertData",
                     type: "GET", // Gửi bằng phương thức GET
-                    data: { timeout: getSelectedRadioValue("time"), address: getSelectedRadioValue("address") },
+                    data: { timeout: getSelectedRadioValue("time"), address: getSelectedRadioValue("address"), checkbox: checkCheckbox()},
                     dataType: "json",
                     success: function (result) {
+                        if (result.redirectUrl != null) {
+                            window.location.href = result.redirectUrl;
+                        }
                         document.getElementById("updateStatus").style.display = "block";
                         document.getElementById("updateStatus").style.color = "green";
                         console.log("Update successfully.");
@@ -463,10 +481,11 @@
             document.querySelectorAll('input[name="address"]').forEach(radio => {
                 radio.disabled = false;
             });
+            document.getElementById("supermarket").disabled = false;
             document.getElementById("btnUpdate").style.display = "none";
             document.getElementById("updateStatus").style.display = "none";
             document.getElementById("btnOK").style.display = "block";
-            document.querySelectorAll("input[name='time']").forEach(radio => radio.checked = false);
+            //document.querySelectorAll("input[name='time']").forEach(radio => radio.checked = false);
         });
 
     </script>

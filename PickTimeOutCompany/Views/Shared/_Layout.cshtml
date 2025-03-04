@@ -1,60 +1,218 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="icon" type="image/x-icon" href="~/Logo/图标.jpeg">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title</title>
+
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* Tổng layout */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            background: #f4f4f4;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background: #2c3e50;
+            color: white;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            transition: width 0.3s ease-in-out;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+            /* Khi sidebar thu nhỏ */
+            .sidebar.collapsed {
+                width: 80px;
+                align-items: center;
+            }
+
+            /* Logo */
+            .sidebar .logo {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                font-size: 22px;
+                font-weight: bold;
+                color: white;
+                height: 60px;
+                padding-left: 10px;
+            }
+
+            /* Khi thu nhỏ, ẩn chữ */
+            .sidebar.collapsed .logo span {
+                display: none;
+            }
+
+        /* Nút toggle */
+        .toggle-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            background: #34495e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            left: 20px;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding-left: 10px;
+        }
+
+            a:hover {
+                color: white;
+                text-decoration: none;
+                background: #34495e;
+            }
+
+        /* Menu */
+        .sidebar .menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+            flex: 1;
+        }
+
+            .sidebar .menu li {
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                transition: background 0.3s;
+            }
+
+                .sidebar .menu li a {
+                    color: white;
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+                    padding-left: 10px;
+                }
+
+                .sidebar .menu li i {
+                    font-size: 18px;
+                    width: 24px;
+                    text-align: center;
+                    margin-right: 10px;
+                }
+
+                .sidebar .menu li:hover {
+                    background: #34495e;
+                }
+
+        /* Khi thu gọn, ẩn chữ */
+        .sidebar.collapsed .menu li a span {
+            display: none;
+        }
+
+        /* Nội dung chính */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s ease-in-out;
+            width: calc(100% - 250px);
+        }
+
+        /* Khi sidebar thu nhỏ */
+        .sidebar.collapsed + .content {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+        }
+
+        .logo {
+            margin-top: 50px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: #eaeaea;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
-
 <body>
-    <nav class="navbar navbar-inverse">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-
-                <div class="logo-center navbar-brand">
-                    <div>@Html.ActionLink("TimeOut Web", "Index", "Home")</div>
-                </div>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar collapsed" id="sidebar">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <span><a href="@Url.Action("Index", "Home")">登記平台</a></span>
             </div>
+            <ul class="menu">
+                @*@if (Session["Role"] != null && Session["Role"].ToString() == "HR")
+                    {
+                        <li><a href="@Url.Action("DataForHr", "DataForHr")"><i class="fas fa-database"></i> <span>Data For HR</span></a></li>
+                    }
+                    @if (Session["Role"] != null && Session["Role"].ToString() == "Staff")
+                    {
+                        <li><a href="@Url.Action("VehicleDispatch", "VehicleDispatch")"><i class="fas fa-clock"></i> <span>Pick Time Out</span></a></li>
+                    }*@
+                <li><a href="@Url.Action("VehicleDispatch", "VehicleDispatch")"><i class="fas fa-clock"></i> <span>Pick Time Out</span></a></li>
+                <li><a href="@Url.Action("DataForHr", "DataForHr")"><i class="fas fa-database"></i> <span>Data For HR</span></a></li>
+                <li><a href="@Url.Action("Login", "Home")"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a></li>
+            </ul>
+        </nav>
 
-            <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Pick Time Out", "VehicleDispatch", "VehicleDispatch")</li>
-                </ul>
-
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Data For HR", "DataForHr", "DataForHr")</li>
-                </ul>
-
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Log Out", "Login", "Home")</li>
-                </ul>
-            </div>
-
-            @*<div class="logo-center navbar-brand">
-                    <ul class="nav navbar-nav">
-                        <li>@Html.ActionLink("Log Out", "Login", "Home")</li>
-                    </ul>
-                </div>*@
+        <!-- Nội dung chính -->
+        <div class="content" id="content">
+            @RenderBody()
+            <hr />
+            <footer>
+                <p>&copy; @DateTime.Now.Year - Design by SI</p>
+            </footer>
         </div>
-    </nav>
-
-
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - PickTimeOutComany - GMV</p>
-        </footer>
     </div>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var btn = document.querySelector(".toggle-btn i");
+
+            sidebar.classList.toggle("collapsed");
+        }
+    </script>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")

@@ -2,20 +2,22 @@
     ViewBag.Title = "DataForHR";
 }
 
-@if (@TempData["Alert"] != null)
+@*@if (@TempData["Alert"] != null)
 {
     <script type="text/javascript">
         window.onload = function () {
                 alert("@TempData["Alert"]")
                     };
     </script>
-}
+}*@
 
 <div id="spinner"></div>
 <h2>
     當日車輛登記信息-@{ var today = DateTime.Now.ToString("yyyy/MM/dd"); }@today
 </h2>
-
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
 
 
 <div class="are-search">
@@ -34,6 +36,10 @@
             </table>
         </div>
 
+
+        <!-- Button Export Excel -->
+        @*<button id="exportExcel" class="btn btn-success">Export To Excel</button>*@
+        <button id="btnExportExcel" class="btn btn-success" style="background-color: #8e6d11; border:none">Export to Excel</button>
 
         <div class="table-data">
             <table class="table table-striped table-class " id="PickInfo">
@@ -356,12 +362,21 @@
                 complete: function () {
                 },
                 error: function () {
-
                 }
             });
         }
+        document.getElementById("btnExportExcel").addEventListener("click", function () {
+            window.location.href = "/DataForHR/ExportToExcel";
+        });
 
+        //document.getElementById("exportExcel").addEventListener("click", function () {
+        //    let table = document.getElementById("PickInfo");
+        //    let wb = XLSX.utils.book_new();
+        //    let ws = XLSX.utils.table_to_sheet(table);
 
+        //    XLSX.utils.book_append_sheet(wb, ws, "PickInfo");
+        //    XLSX.writeFile(wb, "PickInfo.xlsx");
+        //});
     </script>
 }
 

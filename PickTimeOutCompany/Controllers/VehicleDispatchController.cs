@@ -27,7 +27,7 @@ namespace PickTimeOutCompany.Controllers
 
                 DateTime currentDate = DateTime.Now;
                 string formattedDate = currentDate.ToString("yyyy/MM/dd");
-                string getAddress = @"select address from GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and DATE_OUT = '" + formattedDate + "'";
+                string getAddress = @"select address, time_out, supermarket from GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and DATE_OUT = '" + formattedDate + "'";
                 using (OracleConnection conn = new OracleConnection(connectionString))
                 {
                     conn.Open();
@@ -39,6 +39,8 @@ namespace PickTimeOutCompany.Controllers
                             while (reader.Read())
                             {
                                 ViewBag.selectedAddress = reader["address"].ToString();
+                                ViewBag.selectedTimeout = reader["time_out"].ToString();
+                                ViewBag.selectedSupermarket = reader["supermarket"].ToString();
                             }
                         }
                     }
@@ -50,7 +52,7 @@ namespace PickTimeOutCompany.Controllers
 
                 return View();
             }
-            
+
         }
 
         public JsonResult GetTableData()
@@ -75,7 +77,8 @@ namespace PickTimeOutCompany.Controllers
                             string des = reader["description"].ToString();
                             string time = reader["time_out"].ToString();
                             string address = reader["address"].ToString();
-                            switch(address)
+                            string supermarket = reader["supermarket"].ToString();
+                            switch (address)
                             {
                                 case "TIEN LOC":
                                     address = "近禄";
@@ -88,8 +91,12 @@ namespace PickTimeOutCompany.Controllers
                                     break;
                             }
                             string cdt = reader["cdt"].ToString();
+                            DateTime dateTime = Convert.ToDateTime(cdt);
+                            cdt = dateTime.ToString("yyyy/MM/dd HH:mm:ss");
                             string udt = reader["udt"].ToString();
-                            VehicleDispatchModel temp = new VehicleDispatchModel { DATE_OUT = date, USER_NAME = user, DESCRIPTION = des, TIME_OUT = time, ADDRESS = address, CDT = cdt, UDT = udt };
+                            dateTime = Convert.ToDateTime(udt);
+                            udt = dateTime.ToString("yyyy/MM/dd HH:mm:ss");
+                            VehicleDispatchModel temp = new VehicleDispatchModel { DATE_OUT = date, USER_NAME = user, DESCRIPTION = des, TIME_OUT = time, ADDRESS = address, SUPERMARKET = supermarket, CDT = cdt, UDT = udt };
                             vehicleDispatchModels.Add(temp);
                         }
                     }
@@ -99,26 +106,33 @@ namespace PickTimeOutCompany.Controllers
         }
 
         [HttpGet]
-        public JsonResult InsertData(string timeout, string address)
+        public JsonResult InsertData(string timeout, string address, string checkbox)
         {
             try
             {
+                if ((string)Session["UserName"] == null)
+                {
+                    TempData["Error"] = "Session End, Please Login Again!!!";
+                    return Json(new { redirectUrl = Url.Action("Login", "Home") }, JsonRequestBehavior.AllowGet);
+                }
+
                 DateTime currentDate = DateTime.Now;
                 string formattedDate = currentDate.ToString("yyyy/MM/dd");
                 string insertData = @"insert into GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG (date_out, user_name, description, time_out, address, cdt, udt) values "
                                       + @"('" + formattedDate + "', '" + (string)Session["UserId"] + "', '" + (string)Session["UserName"] + "', '" + timeout + "', '" + address + "', sysdate, sysdate)";
 
                 string changeDate = @"MERGE INTO GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG e " +
-                                      @"USING (SELECT '" + formattedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address FROM DUAL) src " +
+                                      @"USING (SELECT '" + formattedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address, '" + checkbox + "' as checkbox FROM DUAL) src " +
                                       @"ON (e.user_name = src.user_name and e.date_out = src.date_out)
                                       WHEN MATCHED THEN
                                           UPDATE SET 
                                               e.time_out = src.time_out,
                                               e.address = src.address,
-                                              e.udt = sysdate
+                                              e.udt = sysdate,
+                                              e.supermarket = src.checkbox
                                       WHEN NOT MATCHED THEN
-                                          INSERT (date_out, user_name, description, time_out, address, cdt, udt)
-                                          VALUES (src.date_out, src.user_name, src.description, src.time_out, src.address, sysdate, sysdate)";
+                                          INSERT (date_out, user_name, description, time_out, address, cdt, udt, supermarket)
+                                          VALUES (src.date_out, src.user_name, src.description, src.time_out, src.address, sysdate, sysdate, src.checkbox)";
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
