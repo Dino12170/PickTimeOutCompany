@@ -302,7 +302,7 @@
         <div id="divAddress">
             <!-- Tạo khoảng cách giữa 2 nhóm -->
             <div style="display: flex;">
-                <label style="width:60px;">地点:</label>
+                <label style="width:60px;">地點:</label>
                 <div id="listAddress"></div>
             </div>
         </div>
@@ -345,6 +345,8 @@
     <script>
         $(document).ready(function () {
             var today = new Date();  // Lấy ngày hiện tại
+            var currentHours = today.getHours();
+            var currentMinutes = today.getMinutes();
             if (today.getDay() === 6) {
                 $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="17:10" style="width:20px;"> <label>17:10</label></label>');
                 $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:00" style="width:20px;"> <label>20:00</label></label>');
@@ -354,9 +356,11 @@
                 $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="19:00" style="width:20px;"> <label>19:00</label></label>');
                 $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" value="20:30" style="width:20px;"> <label>20:30</label></label>');
             }
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="THANH DAT" style="width:20px;"> <label>诚达</label></label>');
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="BAO SON" style="width:20px;"> <label>宝山</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="THANH DAT" style="width:20px;"> <label>誠達</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="BAO SON" style="width:20px;"> <label>寶山</label></label>');
             $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" value="TIEN LOC" style="width:20px;"> <label>近禄</label></label>');
+
+
 
             let selectedAddress = "@(ViewBag.selectedAddress ?? "")";
             setRadioValue("address", selectedAddress);
@@ -366,6 +370,19 @@
                 document.getElementById("supermarket").checked = true; // Nếu Y, checkbox sẽ được check
             }
             updateTable();
+            //document.querySelectorAll("input[name='time']").forEach(radio => {
+            //    var radioTime = radio.value.split(":"); // Giả sử value có định dạng "HH:MM"
+            //    var radioHours = parseInt(radioTime[0], 10);
+            //    var radioMinutes = parseInt(radioTime[1], 10);
+            //    console.log(radioHours, currentHours);
+            //    if (radioHours > currentHours || (radioHours === currentHours && radioMinutes <= currentMinutes)) {
+            //        radio.disabled = true;
+            //    }
+            //    // Kiểm tra nếu radio có thời gian nhỏ hơn thời gian hiện tại thì disable
+            //    //if (radioHours < currentHours || (radioHours === currentHours && radioMinutes <= currentMinutes)) {
+            //    //    radio.disabled = true;
+            //    //}
+            //});
         });
 
         function updateTable() {

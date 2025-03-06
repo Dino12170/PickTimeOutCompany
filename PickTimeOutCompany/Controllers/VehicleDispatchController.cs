@@ -84,10 +84,10 @@ namespace PickTimeOutCompany.Controllers
                                     address = "近禄";
                                     break;
                                 case "THANH DAT":
-                                    address = "诚达";
+                                    address = "誠達";
                                     break;
                                 case "BAO SON":
-                                    address = "宝山";
+                                    address = "寶山";
                                     break;
                             }
                             string cdt = reader["cdt"].ToString();
