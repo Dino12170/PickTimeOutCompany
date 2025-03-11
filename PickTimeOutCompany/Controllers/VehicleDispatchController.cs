@@ -60,8 +60,11 @@ namespace PickTimeOutCompany.Controllers
             List<VehicleDispatchModel> vehicleDispatchModels = new List<VehicleDispatchModel>();
             DateTime currentDate = DateTime.Now;
             string formattedDate = currentDate.ToString("yyyy/MM/dd");
+            string today = currentDate.ToString("yyyy/MM/dd");
+            string nextDay = currentDate.AddDays(1).ToString("yyyy/MM/dd");
+            string nextTomorrowDay = currentDate.AddDays(2).ToString("yyyy/MM/dd");
             //string connectionString = @"ConnstrOther=Provider=MSDAORA.1;Password=ATTENDANCE01;User ID=GEMTEK_ATTENDANCE;Data Source=VNOTHDB;Persist Security Info=True;";
-            string getData = @"SELECT * FROM GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and date_out = '" + formattedDate + "'";
+            string getData = @"SELECT * FROM GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and date_out in ('" + today + "','" + nextDay + "','" + nextTomorrowDay + "') order by date_out";
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
@@ -106,7 +109,7 @@ namespace PickTimeOutCompany.Controllers
         }
 
         [HttpGet]
-        public JsonResult InsertData(string timeout, string address, string checkbox)
+        public JsonResult InsertData(string timeout, string address, string checkbox, string selectedDate)
         {
             try
             {
@@ -116,13 +119,13 @@ namespace PickTimeOutCompany.Controllers
                     return Json(new { redirectUrl = Url.Action("Login", "Home") }, JsonRequestBehavior.AllowGet);
                 }
 
-                DateTime currentDate = DateTime.Now;
-                string formattedDate = currentDate.ToString("yyyy/MM/dd");
-                string insertData = @"insert into GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG (date_out, user_name, description, time_out, address, cdt, udt) values "
-                                      + @"('" + formattedDate + "', '" + (string)Session["UserId"] + "', '" + (string)Session["UserName"] + "', '" + timeout + "', '" + address + "', sysdate, sysdate)";
+                //DateTime currentDate = DateTime.Now;
+                //string formattedDate = currentDate.ToString("yyyy/MM/dd");
+                //string insertData = @"insert into GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG (date_out, user_name, description, time_out, address, cdt, udt) values "
+                //                      + @"('" + formattedDate + "', '" + (string)Session["UserId"] + "', '" + (string)Session["UserName"] + "', '" + timeout + "', '" + address + "', sysdate, sysdate)";
 
                 string changeDate = @"MERGE INTO GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG e " +
-                                      @"USING (SELECT '" + formattedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address, '" + checkbox + "' as checkbox FROM DUAL) src " +
+                                      @"USING (SELECT '" + selectedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address, '" + checkbox + "' as checkbox FROM DUAL) src " +
                                       @"ON (e.user_name = src.user_name and e.date_out = src.date_out)
                                       WHEN MATCHED THEN
                                           UPDATE SET 
@@ -157,6 +160,25 @@ namespace PickTimeOutCompany.Controllers
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        public JsonResult getSelectedbyDate(string date_out)
+        {
+            string getData = @"select time_out, address, supermarket from GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and date_out = '" + date_out + "'";
+            List<object> jsonResult = new List<object>();
+            using (OracleConnection conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+                using (OracleCommand cmd = new OracleCommand(getData, conn))
+                {
+                    OracleDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        jsonResult.Add(new { Time = reader["time_out"], Address = reader["address"], Supermarket = reader["supermarket"] });
+                    }
+                }
+            }
+            return Json(jsonResult, JsonRequestBehavior.AllowGet);
         }
     }
 }
