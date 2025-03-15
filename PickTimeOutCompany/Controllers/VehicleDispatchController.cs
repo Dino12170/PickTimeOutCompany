@@ -46,13 +46,10 @@ namespace PickTimeOutCompany.Controllers
                     }
                 }
                 //ViewBag.grpNo = (string)Session["GRPNO"];
-
                 //string html_Ready_To_StockOut = GET_DATA();
                 //ViewBag.HtmlCountTime = html_Ready_To_StockOut;
-
                 return View();
             }
-
         }
 
         public JsonResult GetTableData()
@@ -64,7 +61,7 @@ namespace PickTimeOutCompany.Controllers
             string nextDay = currentDate.AddDays(1).ToString("yyyy/MM/dd");
             string nextTomorrowDay = currentDate.AddDays(2).ToString("yyyy/MM/dd");
             //string connectionString = @"ConnstrOther=Provider=MSDAORA.1;Password=ATTENDANCE01;User ID=GEMTEK_ATTENDANCE;Data Source=VNOTHDB;Persist Security Info=True;";
-            string getData = @"SELECT * FROM GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' and date_out in ('" + today + "','" + nextDay + "','" + nextTomorrowDay + "') order by date_out";
+            string getData = @"SELECT * FROM GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG where user_name = '" + (string)Session["UserId"] + "' AND TO_DATE(date_out, 'yyyy/MM/dd') >= trunc(SYSDATE) order by date_out";
             using (OracleConnection conn = new OracleConnection(connectionString))
             {
                 conn.Open();
@@ -119,14 +116,9 @@ namespace PickTimeOutCompany.Controllers
                     return Json(new { redirectUrl = Url.Action("Login", "Home") }, JsonRequestBehavior.AllowGet);
                 }
 
-                //DateTime currentDate = DateTime.Now;
-                //string formattedDate = currentDate.ToString("yyyy/MM/dd");
-                //string insertData = @"insert into GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG (date_out, user_name, description, time_out, address, cdt, udt) values "
-                //                      + @"('" + formattedDate + "', '" + (string)Session["UserId"] + "', '" + (string)Session["UserName"] + "', '" + timeout + "', '" + address + "', sysdate, sysdate)";
-
                 string changeDate = @"MERGE INTO GEMTEK_ATTENDANCE.GM1_TIMEOUT_LOG e " +
-                                      @"USING (SELECT '" + selectedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address, '" + checkbox + "' as checkbox FROM DUAL) src " +
-                                      @"ON (e.user_name = src.user_name and e.date_out = src.date_out)
+                                                      @"USING (SELECT '" + selectedDate + "' AS date_out, '" + (string)Session["UserId"] + "' AS user_name, '" + (string)Session["UserName"] + "' AS description, '" + timeout + "' AS time_out, '" + address + "' as address, '" + checkbox + "' as checkbox,'" + (string)Session["DepName"] + "' AS depname FROM DUAL) src " +
+                                                      @"ON (e.user_name = src.user_name and e.date_out = src.date_out)
                                       WHEN MATCHED THEN
                                           UPDATE SET 
                                               e.time_out = src.time_out,
@@ -134,8 +126,8 @@ namespace PickTimeOutCompany.Controllers
                                               e.udt = sysdate,
                                               e.supermarket = src.checkbox
                                       WHEN NOT MATCHED THEN
-                                          INSERT (date_out, user_name, description, time_out, address, cdt, udt, supermarket)
-                                          VALUES (src.date_out, src.user_name, src.description, src.time_out, src.address, sysdate, sysdate, src.checkbox)";
+                                          INSERT (date_out, user_name, description, time_out, address, cdt, udt, supermarket,DEPARTMENT)
+                                          VALUES (src.date_out, src.user_name, src.description, src.time_out, src.address, sysdate, sysdate, src.checkbox,src.depname)";
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {

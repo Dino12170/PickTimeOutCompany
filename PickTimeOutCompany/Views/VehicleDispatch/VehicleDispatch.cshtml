@@ -5,9 +5,53 @@
 }
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!-- Bootstrap & Datepicker CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+
 <style>
+    #datepicker {
+        width: 180px;
+        cursor: pointer;
+    }
+
+    .date-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px; /* Tạo khoảng cách giữa label và datepicker */
+    }
+</style>
+
+
+<style>
+    .custom-date {
+        width: 170px;
+        height: 28px;
+        padding: 8px;
+        font-size: 18px;
+        border-radius: 5px;
+        font-weight: initial;
+        font-style: italic;
+    }
+
+        .custom-date:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+        }
+
+    #formattedDate {
+        display: block;
+        margin-top: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #007bff;
+    }
 
     .text-title {
         margin-top: 15px;
@@ -289,15 +333,16 @@
 }
 <h4> @usernameinView - @userIDinView </h4>
 <div>
-    <button id="btnToday" style="padding: 10px 20px; background-color: gray; color: white; border: none; border-radius: 5px; cursor: pointer; width:150px;">
-        @{ var today = DateTime.Now.ToString("yyyy/MM/dd"); }@today
-    </button>
-    <button id="btnNextday" style="padding: 10px 20px; background-color: gray; color: white; border: none; border-radius: 5px; cursor: pointer; width: 150px;">
-        @{ var nextDay = DateTime.Now.AddDays(1).ToString("yyyy/MM/dd"); }@nextDay
-    </button>
-    <button id="btnNextTomorrow" style="padding: 10px 20px; background-color: gray; color: white; border: none; border-radius: 5px; cursor: pointer; width: 150px; ">
-        @{ var nextTomorrowDay = DateTime.Now.AddDays(2).ToString("yyyy/MM/dd"); }@nextTomorrowDay
-    </button>
+    @{var today = DateTime.Now.ToString("yyyy/MM/dd");}
+    <div class="container">
+        <div class="date-container">
+            <label>Select Date:</label>
+            <div id="datepicker" class="input-group date">
+                <input class="form-control" type="text" readonly style="font-size:medium; width:150px; font-style:italic;" />
+                <span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <br />
@@ -356,63 +401,12 @@
     <script>
         var selectedDate = "@today";
         $(document).ready(function () {
-            document.getElementById("btnToday").click();
             var today = new Date();  // Lấy ngày hiện tại
-            var currentHours = today.getHours();
-            var currentMinutes = today.getMinutes();
-            if (today.getDay() === 6) {
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time1" value="17:10" style="width:20px;"> <label for="time1">17:10</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time2" value="20:00" style="width:20px;"> <label for="time2">20:00</label></label>');
-            }
-            else {
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time1" value="17:50" style="width:20px;"> <label for="time1">17:50</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time2" value="19:00" style="width:20px;"> <label for="time2">19:00</label></label>');
-                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time3" value="20:30" style="width:20px;"> <label for="time3">20:30</label></label>');
-            }
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address1" value="THANH DAT" style="width:20px;"> <label for="address1">誠達</label></label>');
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address2" value="BAO SON" style="width:20px;"> <label for="address2">寶山</label></label>');
-            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address3" value="TIEN LOC" style="width:20px;"> <label for="address3">近禄</label></label>');
-
-
-
-            @*let selectedAddress = "@(ViewBag.selectedAddress ?? "")";
-            setRadioValue("address", selectedAddress);
-            let selectedTimout = "@(ViewBag.selectedTimeout ?? "")";
-            setRadioValue("time", selectedTimout);
-            if ("@ViewBag.selectedSupermarket" === "Y") {
-                document.getElementById("supermarket").checked = true; // Nếu Y, checkbox sẽ được check
-            }*@
+            selectDateButton(selectedDate);
             updateTable();
-            //document.querySelectorAll("input[name='time']").forEach(radio => {
-            //    var radioTime = radio.value.split(":"); // Giả sử value có định dạng "HH:MM"
-            //    var radioHours = parseInt(radioTime[0], 10);
-            //    var radioMinutes = parseInt(radioTime[1], 10);
-            //    console.log(radioHours, currentHours);
-            //    if (radioHours > currentHours || (radioHours === currentHours && radioMinutes <= currentMinutes)) {
-            //        radio.disabled = true;
-            //    }
-            //    // Kiểm tra nếu radio có thời gian nhỏ hơn thời gian hiện tại thì disable
-            //    //if (radioHours < currentHours || (radioHours === currentHours && radioMinutes <= currentMinutes)) {
-            //    //    radio.disabled = true;
-            //    //}
-            //});
         });
 
-        function checkTime() {
-            var today = new Date();  // Lấy ngày hiện tại
-            var currentHours = today.getHours();
-            var currentMinutes = today.getMinutes();
-            document.querySelectorAll("input[name='time']").forEach(radio => {
-                var radioTime = radio.value.split(":");
-                var radioHours = parseInt(radioTime[0], 10);
-                var radioMinutes = parseInt(radioTime[1], 10);
-                //console.log(radioHours, currentHours);
-                if (radioHours > currentHours || (radioHours === currentHours && radioMinutes <= currentMinutes)) {
-                    radio.disabled = true;
-                }
-            });
-        }
-
+        //hiện dữ liệu lên bảng sau khi insert (update)
         function updateTable() {
             $.ajax({
                 url: '/VehicleDispatch/GetTableData',
@@ -421,48 +415,26 @@
                 success: function (data) {
                     var tableBody = $('#dataBody');
                     tableBody.empty();
-                    //console.log(data);
-                    if (data.length === 0) {
-                        document.querySelectorAll('input[name="time"]').forEach(radio => {
-                            radio.disabled = false;
-                        });
-                        document.querySelectorAll('input[name="address"]').forEach(radio => {
-                            radio.disabled = false;
-                        });
-                        document.getElementById("btnUpdate").style.display = "none";
-                        document.getElementById("btnOK").style.display = "block";
-                    }
-                    else {
-                        $.each(data, function (index, item) {
-                            var row = `<tr style="text-align: center;">
-                                                                        <td>${item.DATE_OUT}</td>
-                                                                        <td>${item.TIME_OUT}</td>
-                                                                        <td>${item.ADDRESS}</td>
-                                                                        <td>${item.SUPERMARKET}</td>
-                                                                        <td>${item.USER_NAME}</td>
-                                                                        <td>${item.DESCRIPTION}</td>
-                                                                        <td>${item.UDT}</td>
-                                                                    </tr>`
-                            tableBody.append(row);
-                        });
-
-                        document.querySelectorAll('input[name="time"]').forEach(radio => {
-                            radio.disabled = true;
-                        });
-                        document.querySelectorAll('input[name="address"]').forEach(radio => {
-                            radio.disabled = true;
-                        });
-                        document.getElementById("supermarket").disabled = true;
-                        document.getElementById("btnOK").style.display = "none";
-                        document.getElementById("btnUpdate").style.display = "block";
-                    }
+                    $.each(data, function (index, item) {
+                        var row = `<tr style="text-align: center;">
+                                                                    <td>${item.DATE_OUT}</td>
+                                                                    <td>${item.TIME_OUT}</td>
+                                                                    <td>${item.ADDRESS}</td>
+                                                                    <td>${item.SUPERMARKET}</td>
+                                                                    <td>${item.USER_NAME}</td>
+                                                                    <td>${item.DESCRIPTION}</td>
+                                                                    <td>${item.UDT}</td>
+                                                                </tr>`
+                        tableBody.append(row);
+                    });
                 },
                 error: function () {
-                    alert("Lỗi khi tải dữ liệu!");
+                    alert("Error at updateTable(): There aren't datas!");
                 }
             });
         }
 
+        //Lựa chọn 1 button trong 1 group radio button -> xử lý trường hợp lấy dữ liệu từ database và cần hiển thị lên view
         function setRadioValue(elementName, value) {
             let radios = document.getElementsByName(elementName);
 
@@ -475,22 +447,82 @@
             return false; // Trả về false nếu không tìm thấy giá trị trùng khớp
         }
 
-
+        //Kiểm tra trong 1 group radio button, đã có button nào selected hay chưa -> kiểm tra xem có đủ giá trị để insert hay không
         function checkRadio(elementName) {
             let selectedRadio = document.querySelector(`input[name="${elementName}"]:checked`);
             return selectedRadio === null;
         }
+
+        //truyền vào tên của group radio button, lấy ra giá trị đã lựa chọn -> lấy giá trị đã chọn để truyền qua Controller -> insert vào database
         function getSelectedRadioValue(elementName) {
             let selectedRadio = document.querySelector(`input[name="${elementName}"]:checked`);
             return selectedRadio ? selectedRadio.value : null;
         }
 
+        //Kiểm tra xem có check đi siêu thị hay không, trả ra Y or N
         function checkCheckbox() {
             var checkbox = document.getElementById("supermarket");
             return checkbox.checked ? "Y" : "N";
         }
 
+        //Mỗi lần chọn 1 ngày, cần kiểm tra có phải t7 hay ko, dựa vào đó để thêm các radio button tương ứng,
+        //và phải set sự kiện lại cho từng radio button(vì sự kiện set trong document.ready() chỉ set 1 lần khi document đã load xong, nếu xóa đi và thêm lại, sự kiện sẽ ko được giữ lại)
         function selectDateButton(date) {
+            var dateParts = date.split("/");
+            var dateSelected = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            //Thêm lại các radio button
+            $("#listTime").empty();
+            $("#listAddress").empty();
+            if (dateSelected.getDay() === 6) {
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time1" value="17:10" style="width:20px;"> <label for="time1">17:10</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time2" value="20:00" style="width:20px;"> <label for="time2">20:00</label></label>');
+            }
+            else {
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time1" value="17:50" style="width:20px;"> <label for="time1">17:50</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time2" value="19:00" style="width:20px;"> <label for="time2">19:00</label></label>');
+                $("#listTime").append('<label style="width:140px;"><input type="radio" name="time" id="time3" value="20:30" style="width:20px;"> <label for="time3">20:30</label></label>');
+            }
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address1" value="THANH DAT" style="width:20px;"> <label for="address1">誠達</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address2" value="BAO SON" style="width:20px;"> <label for="address2">寶山</label></label>');
+            $("#listAddress").append('<label style="width:140px;"><input type="radio" name="address" id="address3" value="TIEN LOC" style="width:20px;"> <label for="address3">近禄</label></label>');
+
+            //Tạo lại sự kiện
+            document.querySelectorAll('input[name="time"]').forEach(radio => {
+                radio.addEventListener("change", function () {
+                    if (this.checked) {
+                        if (radio.id === "time1") {
+                            document.getElementById("supermarket").disabled = true;
+                        }
+                        else if (getSelectedRadioValue("address") !== "THANH DAT") {
+                            document.getElementById("supermarket").disabled = false;
+                        }
+                    }
+                });
+            });
+            document.querySelectorAll('input[name="address"]').forEach(radio => {
+                radio.addEventListener("change", function () {
+                    if (this.checked) {
+                        if (radio.id === "address1") {
+                            document.getElementById("supermarket").disabled = true;
+                        }
+                        else if (getSelectedRadioValue("time") !== "17:50" && getSelectedRadioValue("time") !== "17:10") {
+                            document.getElementById("supermarket").disabled = false;
+                        }
+                    }
+                });
+            });
+            document.getElementById("supermarket").addEventListener("change", function () {
+                if (this.checked) {
+                    document.getElementById("time1").disabled = true;
+                    document.getElementById("address1").disabled = true;
+                }
+                else {
+                    document.getElementById("time1").disabled = false;
+                    document.getElementById("address1").disabled = false;
+                }
+            });
+
+            //Dựa vào dữ liệu lấy được từ database, set trạng thái và giá trị cho các button
             $.ajax({
                 url: "/VehicleDispatch/getSelectedbyDate",
                 type: "GET",
@@ -536,78 +568,34 @@
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Lỗi thêm dữ liệu:", error);
+                    console.error("Error at function selectDateButton(date):", error);
                 }
             });
         };
 
-        document.getElementById("btnToday").addEventListener("click", function () {
-            selectedDate = "@today";
-            this.style.backgroundColor = "#11728c";
-            document.getElementById("btnNextday").style.backgroundColor = "gray";
-            document.getElementById("btnNextTomorrow").style.backgroundColor = "gray";
-            selectDateButton(selectedDate);
-        });
-
-        document.getElementById("btnNextday").addEventListener("click", function () {
-            selectedDate = "@nextDay";
-            this.style.backgroundColor = "#11728c";
-            document.getElementById("btnToday").style.backgroundColor = "gray";
-            document.getElementById("btnNextTomorrow").style.backgroundColor = "gray";
-            selectDateButton(selectedDate);
-        });
-
-        document.getElementById("btnNextTomorrow").addEventListener("click", function () {
-            selectedDate = "@nextTomorrowDay";
-            this.style.backgroundColor = "#11728c";
-            document.getElementById("btnToday").style.backgroundColor = "gray";
-            document.getElementById("btnNextday").style.backgroundColor = "gray";
-            selectDateButton(selectedDate);
-        });
-
-        $(document).ready(function () {
-            document.querySelectorAll('input[name="time"]').forEach(radio => {
-                radio.addEventListener("change", function () {
-                    if (this.checked) {
-                        if (radio.id === "time1") {
-                            document.getElementById("supermarket").disabled = true;
-                        }
-                        else if (getSelectedRadioValue("address") !== "THANH DAT") {
-                            document.getElementById("supermarket").disabled = false;
-                        }
-                    }
-                });
-            });
-            document.querySelectorAll('input[name="address"]').forEach(radio => {
-                radio.addEventListener("change", function () {
-                    if (this.checked) {
-                        if (radio.id === "address1") {
-                            document.getElementById("supermarket").disabled = true;
-                        }
-                        else if (getSelectedRadioValue("time") !== "17:50" && getSelectedRadioValue("time") !== "17:10") {
-                            document.getElementById("supermarket").disabled = false;
-                        }
-                    }
-                });
-            });
-            document.getElementById("supermarket").addEventListener("change", function () {
-                if (this.checked) {
-                    document.getElementById("time1").disabled = true;
-                    document.getElementById("address1").disabled = true;
-                }
-                else {
-                    document.getElementById("time1").disabled = false;
-                    document.getElementById("address1").disabled = false;
-                }
+        //Cài đặt properties và events cho datepicker
+        $(function () {
+            $("#datepicker").datepicker(
+                {
+                    format: "yyyy/mm/dd",
+                    autoclose: true,
+                    todayHighlight: true,
+                    startDate: new Date()
+                }).datepicker('update', new Date());
+            $("#datepicker").on('changeDate', function (e) {
+                selectedDate = e.format(0, "yyyy/mm/dd"); // Lấy ngày đã chọn
+                selectDateButton(selectedDate);
+                //console.log("Selected Date:", selectedDate);  // Hiển thị trong console
             });
         });
 
+        //Xử lý sau khi người dùng click button OK
         document.getElementById("btnOK").addEventListener("click", function () {
             if (checkRadio("time")) {
                 alert("Please select Time Out!");
             }
             else if (checkRadio("address")) {
-                alert("Please select address!")
+                alert("Please select address!");
             }
             else {
                 $.ajax({
@@ -621,7 +609,16 @@
                         }
                         document.getElementById("updateStatus").style.display = "block";
                         document.getElementById("updateStatus").style.color = "green";
-                        console.log("Update successfully.");
+                        document.querySelectorAll('input[name="time"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
+                        document.querySelectorAll('input[name="address"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
+                        document.getElementById("supermarket").disabled = true;
+                        document.getElementById("btnUpdate").style.display = "block";
+                        document.getElementById("btnOK").style.display = "none";
+                        //console.log("Update successfully.");
                         updateTable();
                     },
                     error: function (xhr, status, error) {
@@ -631,6 +628,7 @@
             }
         });
 
+        //Xử lý sau khi người dùng click button Update
         document.getElementById("btnUpdate").addEventListener("click", function () {
             document.querySelectorAll('input[name="time"]').forEach(radio => {
                 radio.disabled = false;
@@ -654,6 +652,12 @@
             }
             //document.querySelectorAll("input[name='time']").forEach(radio => radio.checked = false);
         });
+
+    </script>
+    <!-- jQuery & Bootstrap Datepicker -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script>
 
     </script>
 }
