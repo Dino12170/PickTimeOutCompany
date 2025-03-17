@@ -20,7 +20,7 @@
 
         /* Sidebar */
         .sidebar {
-            width: 200px;
+            width: 160px;
             background: #2c3e50;
             color: white;
             padding-top: 20px;
@@ -31,26 +31,26 @@
             left: 0;
             height: 100vh;
             transition: width 0.3s ease-in-out;
-            padding-left: 15px;
-            padding-right: 15px;
+            padding-left: 0px;
+            padding-right: 0px;
         }
 
             /* Khi sidebar thu nhỏ */
             .sidebar.collapsed {
-                width: 80px;
+                width: 60px;
                 align-items: center;
             }
 
             /* Logo */
             .sidebar .logo {
-                display: flex;
                 align-items: center;
                 justify-content: flex-start;
                 font-size: 22px;
                 font-weight: bold;
                 color: white;
-                height: 60px;
-                padding-left: 10px;
+                height: 30px;
+                padding-left: 50px;
+                margin-top:5px;
             }
 
             /* Khi thu nhỏ, ẩn chữ */
@@ -79,8 +79,16 @@
             transition: all 0.3s;
         }
 
+        .sidebar-header {
+            display: grid;
+            grid-template-columns: auto 1fr; /* Cột đầu nhỏ, cột sau lớn */
+            align-items: center;
+            padding-left: 10px;
+            gap: 10px; /* Khoảng cách giữa button và logo */
+        }
+
         .sidebar.collapsed .toggle-btn {
-            left: 20px;
+            left: 10px;
         }
 
         a {
@@ -89,7 +97,6 @@
             display: flex;
             align-items: center;
             width: 100%;
-            padding-left: 10px;
         }
 
             a:hover {
@@ -154,8 +161,14 @@
         }
 
         .logo {
-            margin-top: 50px;
+            margin-top: 0px;
         }
+
+            .logo span a {
+                text-decoration: none;
+                font-size: 18px;
+                font-weight: bold;
+            }
 
         /* Footer */
         footer {
@@ -173,16 +186,24 @@
     <div class="main-container">
         <!-- Sidebar -->
         <nav class="sidebar collapsed" id="sidebar">
-            <button class="toggle-btn" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <span><a href="@Url.Action("Index", "Home")">登記平台</a></span>
+            @*<button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <span><a href="@Url.Action("Index", "Home")">登記平台</a></span>
+                </div>*@
+            <div class="sidebar-header">
+                <button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <span><a href="@Url.Action("Index", "Home")">登記平台</a></span>
+                </div>
             </div>
             <ul class="menu">
                 @*@if (Session["Role"] != null && Session["Role"].ToString() == "HR")
                     {
-                        <li><a href="@Url.Action("DataForHr", "DataForHr")"><i class="fas fa-database"></i> <span>Data For HR</span></a></li>
+                        <li><a href="@Url.Action("DataForHr", "DataForHr")"><i class="fas fa-database"></i> <span>Data For HR</span></a></li> 登記平台
                     }
                     @if (Session["Role"] != null && Session["Role"].ToString() == "Staff")
                     {

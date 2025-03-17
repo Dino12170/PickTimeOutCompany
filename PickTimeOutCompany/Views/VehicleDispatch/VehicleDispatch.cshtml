@@ -18,12 +18,24 @@
     #datepicker {
         width: 180px;
         cursor: pointer;
+        /*font-family: Arial, sans-serif;*/ /* Chọn font chữ */
+        /*font-size: 20px;*/ /* Kích thước chữ */
+        /*font-weight: 700;*/ /* Đậm hơn nếu cần */
+        /*text-align: center;*/ /* Căn giữa chữ */
     }
 
     .date-container {
         display: inline-flex;
         align-items: center;
         gap: 10px; /* Tạo khoảng cách giữa label và datepicker */
+    }
+
+    input.form-control {
+        font-weight: bold;
+        font-size: medium;
+        width: 150px;
+        font-style: inherit;
+        color: #333;
     }
 </style>
 
@@ -336,9 +348,9 @@
     @{var today = DateTime.Now.ToString("yyyy/MM/dd");}
     <div class="container">
         <div class="date-container">
-            <label>Select Date:</label>
+            <label>日期:</label>
             <div id="datepicker" class="input-group date">
-                <input class="form-control" type="text" readonly style="font-size:medium; width:150px; font-style:italic;" />
+                <input class="form-control" type="text" readonly/>
                 <span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
             </div>
         </div>
